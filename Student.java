@@ -2,6 +2,7 @@ package model;
 
 public class Student
 {
+    private String refNumber;
     private String idNumber;
     private String firstName;
     private String lastName;
@@ -11,8 +12,13 @@ public class Student
     private String issue;
     private String issueDetails;
 
+
+
+    private String responses;
+
     public Student()
     {
+        this.refNumber="";
         this.idNumber = "";
         this.firstName = "";
         this.lastName = "";
@@ -21,11 +27,13 @@ public class Student
         this.issueType = "";
         this.issue= "";
         this.issueDetails = "";
+        this.responses="";
     }
 
-    public Student(String idNumber, String firstName, String lastName, String email,
-                   int contactNumber, String issueType, String issue, String issueDetails)
+    public Student(String refNumber,String idNumber, String firstName, String lastName, String email,
+                   int contactNumber, String issueType, String issue, String issueDetails, String responses)
     {
+        this.refNumber=refNumber;
         this.idNumber = idNumber;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -34,10 +42,12 @@ public class Student
         this.issueType = issueType;
         this.issue = issue;
         this.issueDetails = issueDetails;
+        this.responses=responses;
     }
 
 
     public Student(Student student) {
+        this.refNumber = student.refNumber;
         this.firstName = student.firstName;
         this.lastName = student.lastName;
         this.email = student.email;
@@ -45,8 +55,19 @@ public class Student
         this.issueType = student.issueType;
         this.issue = student.issue;
         this.issueDetails = student.issueDetails;
+        this.responses=student.responses;
     }
     //getters and setters
+
+
+    public String getRefNumber() {
+        return refNumber;
+    }
+
+    public void setRefNumber(String refNumber) {
+        this.refNumber = refNumber;
+    }
+
     public String getIdNumber() {
         return idNumber;
     }
@@ -111,19 +132,20 @@ public class Student
         this.issueDetails = issueDetails;
     }
 
+    public String getResponses() {
+        return responses;
+    }
+
+    public void setResponses(String responses) {
+        this.responses = responses;
+    }
+
     @Override
-    public String toString()
-    {
-        return "Student{" +
-                "idNumber='" + idNumber + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
-                ", contactNumber=" + contactNumber +
-                ", issueType='" + issueType + '\'' +
-                ", issue='" + issue + '\'' +
-                ", issueDetails='" + issueDetails + '\'' +
-                '}';
+    public String toString() {
+        return String.format("Reference Number: "+ refNumber +"ID Number: "+ idNumber +"\nFirst Name:"+ firstName +"\nLast Name: "+ lastName + "\nemail: "+ email
+                +"\nContact Number: "+ contactNumber +"\nIssue Type: "+ issueType +"\nIssue: "+ issue +"\nIssue Details: "+
+                issueDetails + "\nResponses:"+ responses + "\n");
+
     }
 }
 

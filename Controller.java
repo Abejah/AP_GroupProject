@@ -34,8 +34,9 @@ public class Controller extends Student implements Serializable
         String issueType= student.getIssueType();
         String issue= student.getIssue();
         String issueDetail= student.getIssueDetails();
+        String responses=student.getResponses();
 
-        String createRecordSQL="INSERT INTO studentsdb.students(idNumber, firstName, lastName, email, contactNumber, issueType, issue, issueDetails)" + "VALUES('"+idNumber+"', '"+firstName+"','"+lastName+"','"+email+"','"+contactNumber+"','"+issueType+"','"+issue+"','"+issueDetail+"');";
+        String createRecordSQL="INSERT INTO studentsdb.students(idNumber, firstName, lastName, email, contactNumber, issueType, issue, issueDetails,responses)" + "VALUES('"+idNumber+"', '"+firstName+"','"+lastName+"','"+email+"','"+contactNumber+"','"+issueType+"','"+issue+"','"+issueDetail+"','"+responses+"');";
 
         try {
             statement = connection.createStatement();
@@ -56,8 +57,8 @@ public class Controller extends Student implements Serializable
         }
     }
 
-    public Student findIssue(String issue,String id) {
-        String findStudentSQL = "SELECT idNumber, firstName, lastName, email, contactNumber,issueType,issue, issueDetails FROM studentsdb.students WHERE issue ='"+issue+"' AND idNumber ='"+id+"' ;";
+    public Student findIssue(String Issue,String id) {
+        String findStudentSQL = "SELECT idNumber,firstName,lastName,email,contactNumber,issueType,issue,issueDetails,responses FROM studentsdb.students WHERE issue ='"+Issue+"' AND idNumber ='"+id+"' ;";
 
         try {
             statement =connection.createStatement();
@@ -70,9 +71,9 @@ public class Controller extends Student implements Serializable
                 String email = resultSet.getString("email");
                 int contactNumber= resultSet.getInt("contactNumber");
                 String issueType = resultSet.getString("issueType");
-                String issue1 = resultSet.getString("issue");
-                String issueDetails=resultSet.getString("IssueDetails");
-
+                String issue = resultSet.getString("issue");
+                String issueDetails=resultSet.getString("issueDetails");
+                String responses=resultSet.getString("responses");
 
                 Student issues=new Student();
                 issues.setIdNumber(idNumber);
@@ -81,9 +82,9 @@ public class Controller extends Student implements Serializable
                 issues.setEmail(email);
                 issues.setContactNumber(contactNumber);
                 issues.setIssueType(issueType);
-                issues.setIssueType(issue1);
+                issues.setIssueType(issue);
                 issues.setIssueDetails(issueDetails);
-
+                issues.setResponses(responses);
 
                 return issues;
             }
@@ -97,6 +98,47 @@ public class Controller extends Student implements Serializable
         return null;
 
 
+
+    }
+
+    public ResultSet getResultSet() {
+        return resultSet;
+    }
+
+    public Student getInfoFromDatabase(String id) {
+        String findid= "SELECT idNumber,firstName,lastName,email,contactNumber FROM studentsdb.students WHERE idNumber ='"+id+"';";
+        try {
+            statement =connection.createStatement();
+            resultSet= statement.executeQuery(findid);
+
+            if (resultSet.next()) {
+                String idNumber1 = resultSet.getString("IdNumber");
+                String firstName1 = resultSet.getString("firstName");
+                String lastName1 = resultSet.getString("lastName");
+                String email1 = resultSet.getString("email");
+                int contactNumber1= resultSet.getInt("contactNumber");
+
+
+                Student issues1=new Student();
+                issues1.setIdNumber(idNumber1);
+                issues1.setFirstName(firstName1);
+                issues1.setLastName(lastName1);
+                issues1.setEmail(email1);
+                issues1.setContactNumber(contactNumber1);
+
+
+
+
+                return issues1;
+            }
+        }catch(SQLSyntaxErrorException e) {
+            JOptionPane.showMessageDialog(null, "SQL Syntax Excpetion Detected: " + e.getMessage(), "Student Database Connection", JOptionPane.ERROR_MESSAGE);
+        }catch(SQLException e) {
+            JOptionPane.showMessageDialog(null, "SQL Exception Error: " + e.getMessage(), "Student Database Connection", JOptionPane.ERROR_MESSAGE);
+        }catch(Exception e) {
+            JOptionPane.showMessageDialog(null, "Unexpected Error: " + e.getMessage() + "Try again later", "Student Database Connection", JOptionPane.ERROR_MESSAGE);
+        }
+        return null;
 
     }
 }

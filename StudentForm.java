@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.Serializable;
+import java.sql.*;
 import java.util.Enumeration;
 
 public class StudentForm extends JFrame implements Serializable
@@ -16,7 +17,7 @@ public class StudentForm extends JFrame implements Serializable
     private static final long serialVersionUID = 1L;
     private Student student;
 
-    private static JTextField idNumber,firstName,lastName,email,contactNumber;
+    private static JTextField refNumber,idNumber,firstName,lastName,email,contactNumber;
     private static JButton saveButton;
     private static JTextArea detail;
 
@@ -43,6 +44,7 @@ public class StudentForm extends JFrame implements Serializable
 
 
         //of labels
+        JLabel refNumberLabel = new JLabel("Reference Number: ");
         JLabel idNumberLabel = new JLabel("ID Number: ");
         JLabel firstNameLabel = new JLabel("First Name: ");
         JLabel lastNameLabel = new JLabel("Last Name: ");
@@ -54,6 +56,7 @@ public class StudentForm extends JFrame implements Serializable
         JLabel complaintDetailLabel = new JLabel("Details: ");
 
         //of text-fields
+        refNumber = new JTextField();
         idNumber = new JTextField();
         firstName = new JTextField();
         lastName = new JTextField();
@@ -61,6 +64,9 @@ public class StudentForm extends JFrame implements Serializable
         contactNumber = new JTextField();
         detail = new JTextArea();
 
+
+        refNumberLabel.setBounds(50, 5, 100, 30);
+        refNumber.setBounds(150, 5, 200, 30);
 
         idNumberLabel.setBounds(50, 50, 100, 30);
         idNumber.setBounds(150, 50, 200, 30);
@@ -116,9 +122,10 @@ public class StudentForm extends JFrame implements Serializable
         JScrollPane scrollPane = new JScrollPane(detail);
 
         saveButton = new JButton("Save");
-        saveButton.setBounds(200, 600, 100, 30);
+        saveButton.setBounds(300, 600, 75, 30);
 
-
+        //add(refNumberLabel);
+        //add(refNumber);
         add(idNumberLabel);
         add(idNumber);
         add(firstNameLabel);
@@ -139,15 +146,63 @@ public class StudentForm extends JFrame implements Serializable
         add(scrollPane);
         add(saveButton);
 
-        setTitle("Student Compliant Form");
-        setBounds(250,30,781, 618);
+        setTitle("Student Compliant/Query Form");
+        setBounds(200,30,781, 700);
         setLayout(null);
         setResizable(false);
         setUndecorated(true);
 
+        idNumber.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                    String idField=idNumber.getText();
+
+                    Controller controller=new Controller();
+                    Student students = controller.getInfoFromDatabase(idField);
+
+                    //String name=students.getFirstName();
+
+                    //firstName.setText(students.toString());
+
+
+                    firstName.setEditable(false);
+                    lastName.setEditable(false);
+                    email.setEditable(false);
+                    contactNumber.setEditable(false);
+                try {
+                    firstName.setText(controller.getResultSet().getString(2));
+                    lastName.setText(controller.getResultSet().getString(3));
+                    email.setText(controller.getResultSet().getString(4));
+                    contactNumber.setText(controller.getResultSet().getString(5));
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+
+//                    lastName.setText(student.getLastName(F);
+//                    email.setText(student.getEmail());
+//                    contactNumber.setText(String.valueOf(student.getContactNumber()));
+            }
+        });
+        refNumber.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Controller controller=new Controller();
+                refNumber.setEditable(false);
+                try {
+                    refNumber.setText(controller.getResultSet().getString(1));
+                    JOptionPane.showMessageDialog(null, "Please Make Note of your Reference Number: "+ refNumber, "IMPORTANT MESSAGE", JOptionPane.INFORMATION_MESSAGE);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                String refField = refNumber.getText();
                 String idField = idNumber.getText();
                 String fNameField = firstName.getText();
                 String lNameField = lastName.getText();
@@ -157,16 +212,17 @@ public class StudentForm extends JFrame implements Serializable
                 String DetailField = detail.getText();
                 String complaintTypeBox = (String) compliantTypeComboBox.getSelectedItem();
                 String queryTypeBox = (String) queryTypeComboBox.getSelectedItem();
+
                 for (Enumeration<AbstractButton> buttons = group.getElements(); buttons.hasMoreElements(); ) {
                     AbstractButton button = buttons.nextElement();
                     if (button.isSelected()) {
                         if (button.getText().equals("Compliant")) {
-                            //System.out.println("compliant");
-                            student=new Student(idField,fNameField,lNameField,emailField,contactNumberField,"Compliant",complaintTypeBox,DetailField);
+                            //System.out.println("compliant");""
+                            student=new Student(refField,idField,fNameField,lNameField,emailField,contactNumberField,"Compliant",complaintTypeBox,DetailField,"responses");
                         } else {
                             if (button.getText().equals("Query")) {
                                 //System.out.println("query");
-                                student=new Student(idField,fNameField,lNameField,emailField,contactNumberField,"Query",queryTypeBox,DetailField);
+                                student=new Student(refField,idField,fNameField,lNameField,emailField,contactNumberField,"Query",queryTypeBox,DetailField,"hi");
                             }
                         }
                     }
@@ -175,7 +231,7 @@ public class StudentForm extends JFrame implements Serializable
 
 
                 Controller.createRecord(student);
-
+                refNumber.setText("");
                 idNumber.setText("");
                 firstName.setText("");
                 lastName.setText("");
@@ -188,6 +244,8 @@ public class StudentForm extends JFrame implements Serializable
 
             }
         });
+
+
 
     }
 
