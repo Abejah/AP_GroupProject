@@ -19,7 +19,7 @@ public class DbConn implements Serializable
             String url = "jdbc:mysql://localhost:3306/studentsdb";
 
             try {
-                dbConnection = DriverManager.getConnection(url, "root", "");
+                dbConnection = DriverManager.getConnection(url, "root", "password");
 
                 if (dbConnection != null) {
                     JOptionPane.showMessageDialog(null, "Database Connection Successful", "Students Database Connection", JOptionPane.INFORMATION_MESSAGE);

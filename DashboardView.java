@@ -28,13 +28,13 @@ public class DashboardView extends JFrame implements ActionListener
 
         //left sidebar panel
         leftSidePanel = new JPanelGradient();
-        leftSidePanel.setBounds(0, 0, 240, 680);
+        leftSidePanel.setBounds(0, 0, 240, 750);
 
 
         //left sidebar label title and customization
         JLabel leftSidePanelTitle = new JLabel("Service Type");
-        JLabel leftSidePanelTitle1 = new JLabel("View List");
-        JLabel leftSidePanelTitle2 = new JLabel("Search Complaints");
+        JLabel leftSidePanelTitle1 = new JLabel("Search List");
+        JLabel leftSidePanelTitle2 = new JLabel("View List");
 
 
         leftSidePanelTitle.setBounds(20, 50, 100, 30);
@@ -142,7 +142,7 @@ public class DashboardView extends JFrame implements ActionListener
         });
 
 
-        frame.setSize(1040, 680);
+        frame.setSize(1040, 700);
         frame.setTitle("Dashboard");
         frame.add(leftSidePanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
