@@ -1,6 +1,7 @@
 package view;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 import client.DBClient;
 import domain.Student;
@@ -11,18 +12,32 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
-public class SearchForm extends JFrame {
-    private JTextField searchField;
+public class SearchForm extends JFrame implements ActionListener{
+  
+	private static final long serialVersionUID = 1L;
+	private JTextField searchField;
     private JTextField idSearchField;
     private JButton searchButton;
     private JTextArea resultsArea;
+    private String search,id;
+    private String[] data=new String[10];
+    private String[] columnNames={"Reference Number","Id Number", "First Name", "Last Name", "Email", "Contact Number", "Issue Type","Issue", "Issue Details", "Responses"};
+    public DBClient db;
+    public Student student=new Student();
+    private Object[][] allData=new Object[10][10];
+    private DefaultTableModel model;
+    private JTable table;
+    private JScrollPane scrollPane;
+    
+    
 
     public SearchForm()
     {
+    	this.db= new DBClient();
+    	//this.student=new Student();
 
-        Student student=new Student();
-        String[] data={student.toString()};
-        String[] columnNames={"Id Number", "First Name", "Last Name", "Email", "Contact Number", "Issue Type","Issue", "Issue Details", "Responses"};
+       
+        
         //super("Search GUI");
         setLayout(null);
 
@@ -39,8 +54,12 @@ public class SearchForm extends JFrame {
         //resultsArea.setBounds(10, 50, 380, 210);
         resultsArea.setLineWrap(true);
         resultsArea.setWrapStyleWord(true);
-        JScrollPane scrollPane = new JScrollPane(resultsArea);
-        scrollPane.setBounds(10, 60, 700, 600);
+        scrollPane = new JScrollPane();
+        model =new DefaultTableModel(allData, columnNames);
+        table =new JTable(model);
+        scrollPane.add(table);
+        scrollPane.setBounds(10, 60, 700, 500);
+       
 
         searchField.setForeground(Color.GRAY);
         searchField.addFocusListener(new FocusListener() {
@@ -82,52 +101,83 @@ public class SearchForm extends JFrame {
             }
         });
 
+        searchButton.addActionListener(this);
+        
+        
         add(searchField);
         add(idSearchField);
         add(searchButton);
-        //add(resultsArea);
         add(scrollPane);
+        
+        //add(resultsArea);
+        
 
-        searchButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String search = searchField.getText();
-                String id= idSearchField.getText();
-
-                DBClient DBClient =new DBClient();
-                Student students = DBClient.findIssue(search,id);
-
-                //Student student=new Student();
-                Student[] data={students};
-                //String[] columnNames={"Id Number", "First Name", "Last Name", "Email", "Contact Number", "Issue Type","Issue", "Issue Details", "Responses"};
-
-
-                //System.out.println(student1);
-                // Perform search with query and display results in resultsArea
-                displayTable(data);
-            }
-        });
-
-        setBounds(250,30,781, 700);
+        setBounds(250,30,781, 650);
         setLayout(null);
         setResizable(false);
         setUndecorated(true);
 
     }
-    private void displayTable(Student[] data) {
-        StringBuilder sb = new StringBuilder();
+//    private void displayTable(Student[] data) {
+//        StringBuilder sb = new StringBuilder();
+//
+////        for (Student cell : data) {
+////            sb.append(cell).append(" ");
+////        }
+////        sb.append("\n");
+//
+//        resultsArea.setText(sb.toString());
 
-        for (Student cell : data) {
-            sb.append(cell).append(" ");
-        }
-        sb.append("\n");
-
-        resultsArea.setText(sb.toString());
-
-    }
+    //}
 
     public static void main(String[] args) {
         SearchForm searchForm=new SearchForm();
         searchForm.setVisible(true);
     }
+    
+	@Override
+	public void actionPerformed(ActionEvent e) 
+	{
+		if(e.getSource()==searchButton) 
+		{
+			search = searchField.getText();
+	        id= idSearchField.getText();
+			student = db.findIssue(search,id);
+			
+			
+	        data[0]=student.getRefNumber();
+	        data[1]=student.getIdNumber();
+	        data[2]=student.getFirstName();
+	        data[3]=student.getLastName();
+	        data[4]=student.getEmail();
+	        data[5]=""+student.getContactNumber();
+	        data[6]=student.getIssueType();
+	        data[7]=student.getIssue();
+	        data[8]=student.getIssueDetails();
+	        data[9]=student.getResponses();
+	        
+	       
+	        
+	        
+	        
+	     // Repeat the one-dimensional array in the two-dimensional array
+	        for (int i = 0; i < allData.length; i++)
+	        {
+	        	for(int j=0; j<data.length; j++) 
+				{
+		   
+		        	allData[i][j]=data[j % data.length];
+		        	table.setValueAt(allData, i, j);
+	
+				}
+	            
+	        }
+	        System.out.println(""+ allData[0][0]);
+	        
+	        
+		}
+	        
+         
+			
+	}
 }

@@ -45,7 +45,7 @@ public class StudentForm extends JFrame implements Serializable
 
 
         //of labels
-        JLabel refNumberLabel = new JLabel("Reference Number: ");
+        //JLabel refNumberLabel = new JLabel("Reference Number: ");
         JLabel idNumberLabel = new JLabel("ID Number: ");
         JLabel firstNameLabel = new JLabel("First Name: ");
         JLabel lastNameLabel = new JLabel("Last Name: ");
@@ -64,10 +64,11 @@ public class StudentForm extends JFrame implements Serializable
         email = new JTextField();
         contactNumber = new JTextField();
         detail = new JTextArea();
+        
+        idNumber.setToolTipText("Input your ID the press ENTER on your keyboard to check if your ID exists.");
 
-
-        refNumberLabel.setBounds(50, 5, 100, 30);
-        refNumber.setBounds(150, 5, 200, 30);
+        //refNumberLabel.setBounds(50, 5, 100, 30);
+        //refNumber.setBounds(150, 5, 200, 30);
 
         idNumberLabel.setBounds(50, 50, 100, 30);
         idNumber.setBounds(150, 50, 200, 30);
@@ -123,7 +124,7 @@ public class StudentForm extends JFrame implements Serializable
         JScrollPane scrollPane = new JScrollPane(detail);
 
         saveButton = new JButton("Save");
-        saveButton.setBounds(300, 600, 75, 30);
+        saveButton.setBounds(200, 620, 75, 30);
 
         //add(refNumberLabel);
         //add(refNumber);
@@ -148,7 +149,7 @@ public class StudentForm extends JFrame implements Serializable
         add(saveButton);
 
         setTitle("Student Compliant/Query Form");
-        setBounds(200,30,781, 700);
+        setBounds(250,30,700, 650);
         setLayout(null);
         setResizable(false);
         setUndecorated(true);
@@ -167,10 +168,11 @@ public class StudentForm extends JFrame implements Serializable
                     //firstName.setText(students.toString());
 
 
-                    firstName.setEditable(false);
-                    lastName.setEditable(false);
-                    email.setEditable(false);
-                    contactNumber.setEditable(false);
+                    firstName.setEditable(true);
+                    lastName.setEditable(true);
+                    email.setEditable(true);
+                    contactNumber.setEditable(true);
+                    
                 try {
                     firstName.setText(DBClient.getResultSet().getString(2));
                     lastName.setText(DBClient.getResultSet().getString(3));
@@ -179,6 +181,10 @@ public class StudentForm extends JFrame implements Serializable
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
                 }
+                firstName.setEditable(false);
+                lastName.setEditable(false);
+                email.setEditable(false);
+                contactNumber.setEditable(false);
 
 //                    lastName.setText(student.getLastName(F);
 //                    email.setText(student.getEmail());
@@ -219,7 +225,7 @@ public class StudentForm extends JFrame implements Serializable
                     if (button.isSelected()) {
                         if (button.getText().equals("Compliant")) {
                             //System.out.println("compliant");""
-                            student=new Student(refField,idField,fNameField,lNameField,emailField,contactNumberField,"Compliant",complaintTypeBox,DetailField,"responses");
+                            student=new Student(refField,idField,fNameField,lNameField,emailField,contactNumberField,"Compliant",complaintTypeBox,DetailField,"You should get a lecturer by thursday Miss Roye, sorry for any inconvenienced caused");
                         } else {
                             if (button.getText().equals("Query")) {
                                 //System.out.println("query");
