@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -138,7 +139,54 @@ public class StudentServer implements Serializable
      // Return the Student object
      return stuObj;
  }
-		
+ 	private Object[][] getDataFromDatabase() {
+ 		Object[][] data = null;
+ 	     // Create a query string to select data from the students table in the studentsdb database
+ 	    String query = "SELECT * FROM studentsdb.students;";
+ 	     try {
+ 	         // Create a Statement object to execute the query
+ 	    	statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+ 	         // Execute the query and store the result in a ResultSet object
+ 	         resultSet = statement.executeQuery(query);
+ 	         
+ 	         // Get the number of columns in the result set
+             ResultSetMetaData metaData = resultSet.getMetaData();
+             int numColumns = metaData.getColumnCount();
+
+          // Initialize data array with number of rows in the result set
+             //resultSet.last();
+             int numRows = resultSet.getRow();
+             resultSet.beforeFirst();
+             data = new Object[numRows][numColumns];
+
+             // Retrieve data from result set and store in data array
+             int row = 0;
+             while (resultSet.next()) {
+                 Object[] rowData = new Object[numColumns];
+                 rowData[0] = resultSet.getString(1); // Replace with the appropriate column index for each field
+                 rowData[1] = resultSet.getString(2);
+                 rowData[2] = resultSet.getString(3);
+                 rowData[3] = resultSet.getString(4);
+                 rowData[4] = resultSet.getString(5);
+                 rowData[5] = resultSet.getInt(6);
+                 rowData[6] = resultSet.getString(7);
+                 rowData[7] = resultSet.getString(8);
+                 rowData[8] = resultSet.getString(9);
+                 rowData[9] = resultSet.getString(10);
+                 data[row] = rowData;
+                 row++;
+             }
+
+             // Close database resources
+             resultSet.close();
+             statement.close();
+             connection.close();
+         } catch (SQLException e) {
+             e.printStackTrace();
+         }
+
+         return data;
+ 	 }	
 	
 
 	private void waitForRequests() {
@@ -146,6 +194,7 @@ public class StudentServer implements Serializable
 		getDatabaseConnection();
 		
 		Student stuObj = null;
+		Object[][] data = null;
 		
 		try {
 			while(true) {
@@ -164,6 +213,9 @@ public class StudentServer implements Serializable
                         String stuId = (String) inputStream.readObject();
                         stuObj = findStudentByID(issue,stuId);
                         outputStream.writeObject(stuObj);
+					}else if (action.equals("View All")) {//getDataFromDatabase
+                        data = getDataFromDatabase();
+                        outputStream.writeObject(data);
 					}
 					
 				}catch(ClassNotFoundException ex) {
