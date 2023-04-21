@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -138,7 +139,46 @@ public class StudentServer implements Serializable
      // Return the Student object
      return stuObj;
  }
-		
+ 	private Object[][] getDataFromDatabase() {
+ 		Object[][] data = null;
+ 	     // Create a query string to select data from the students table in the studentsdb database
+ 	     //String query = "SELECT refNumber, idNumber,firstName,lastName,email,contactNumber,issueType,issue,issueDetails,responses FROM studentsdb.students WHERE issue ='"+issue+"' AND idNumber ='"+stuId+"' ;";
+ 	    String sql = "SELECT * FROM studentsdb.students";
+ 	     try {
+ 	         // Create a Statement object to execute the query
+ 	         statement= connection.createStatement();
+ 	         // Execute the query and store the result in a ResultSet object
+ 	         resultSet = statement.executeQuery(sql);
+ 	         
+ 	         // Get the number of columns in the result set
+             ResultSetMetaData metaData = resultSet.getMetaData();
+             int numColumns = metaData.getColumnCount();
+
+          // Initialize data array with number of rows in the result set
+             resultSet.last();
+             int numRows = resultSet.getRow();
+             resultSet.beforeFirst();
+             data = new Object[numRows][numColumns];
+
+             // Retrieve data from result set and store in data array
+             int row = 0;
+             while (resultSet.next()) {
+                 for (int col = 0; col < numColumns; col++) {
+                     data[row][col] = resultSet.getObject(col + 1);
+                 }
+                 row++;
+             }
+
+             // Close database resources
+             resultSet.close();
+             statement.close();
+             connection.close();
+         } catch (SQLException e) {
+             e.printStackTrace();
+         }
+
+         return data;
+ 	 }	
 	
 
 	private void waitForRequests() {
@@ -146,6 +186,7 @@ public class StudentServer implements Serializable
 		getDatabaseConnection();
 		
 		Student stuObj = null;
+		Object[][] data = null;
 		
 		try {
 			while(true) {
@@ -164,6 +205,9 @@ public class StudentServer implements Serializable
                         String stuId = (String) inputStream.readObject();
                         stuObj = findStudentByID(issue,stuId);
                         outputStream.writeObject(stuObj);
+					}else if (action.equals("View All")) {
+                        data = getDataFromDatabase();
+                        outputStream.writeObject(data);
 					}
 					
 				}catch(ClassNotFoundException ex) {
