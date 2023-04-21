@@ -1,6 +1,6 @@
 package driver;
 
-import gui.SSADashboard;
+import view.SSADashboard;
 
 public class Driver {
 	
