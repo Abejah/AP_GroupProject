@@ -9,14 +9,16 @@ import domain.Student;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.io.Serializable;
+import java.net.UnknownHostException;
 import java.sql.*;
 import java.util.Enumeration;
 
 public class StudentForm extends JFrame implements Serializable
 {
     private static final long serialVersionUID = 1L;
-    private Student student;
+    //private Student student;
 
     private static JTextField refNumber,idNumber,firstName,lastName,email,contactNumber;
     private static JButton saveButton;
@@ -154,57 +156,57 @@ public class StudentForm extends JFrame implements Serializable
         setResizable(false);
         setUndecorated(true);
 
-        idNumber.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                    String idField=idNumber.getText();
-
-                    DBClient DBClient =new DBClient();
-                    student = DBClient.getInfoFromDatabase(idField);
-
-                    //String name=students.getFirstName();
-
-                    //firstName.setText(students.toString());
-
-
-                    firstName.setEditable(true);
-                    lastName.setEditable(true);
-                    email.setEditable(true);
-                    contactNumber.setEditable(true);
-                    
-                try {
-                    firstName.setText(DBClient.getResultSet().getString(2));
-                    lastName.setText(DBClient.getResultSet().getString(3));
-                    email.setText(DBClient.getResultSet().getString(4));
-                    contactNumber.setText(DBClient.getResultSet().getString(5));
-                } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
-                }
-                firstName.setEditable(false);
-                lastName.setEditable(false);
-                email.setEditable(false);
-                contactNumber.setEditable(false);
-
-//                    lastName.setText(student.getLastName(F);
-//                    email.setText(student.getEmail());
-//                    contactNumber.setText(String.valueOf(student.getContactNumber()));
-            }
-        });
-        refNumber.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                DBClient DBClient =new DBClient();
-                refNumber.setEditable(false);
-                try {
-                    refNumber.setText(DBClient.getResultSet().getString(1));
-                    JOptionPane.showMessageDialog(null, "Please Make Note of your Reference Number: "+ refNumber, "IMPORTANT MESSAGE", JOptionPane.INFORMATION_MESSAGE);
-                } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
+//        idNumber.addActionListener(new ActionListener()
+//        {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                    String idField=idNumber.getText();
+//
+//                    DBClient DBClient =new DBClient();
+//                    //student = DBClient.getInfoFromDatabase(idField);
+//
+//                    //String name=students.getFirstName();
+//
+//                    //firstName.setText(students.toString());
+//
+//
+//                    firstName.setEditable(true);
+//                    lastName.setEditable(true);
+//                    email.setEditable(true);
+//                    contactNumber.setEditable(true);
+//                    
+////                try {
+////                    firstName.setText(DBClient.getResultSet().getString(2));
+////                    lastName.setText(DBClient.getResultSet().getString(3));
+////                    email.setText(DBClient.getResultSet().getString(4));
+////                    contactNumber.setText(DBClient.getResultSet().getString(5));
+////                } catch (SQLException ex) {
+////                    throw new RuntimeException(ex);
+////                }
+////                firstName.setEditable(false);
+////                lastName.setEditable(false);
+////                email.setEditable(false);
+////                contactNumber.setEditable(false);
+//
+////                    lastName.setText(student.getLastName(F);
+////                    email.setText(student.getEmail());
+////                    contactNumber.setText(String.valueOf(student.getContactNumber()));
+//            }
+//        });
+//        refNumber.addActionListener(new ActionListener()
+//        {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                DBClient DBClient =new DBClient();
+//                refNumber.setEditable(false);
+//                try {
+//                    refNumber.setText(DBClient.getResultSet().getString(1));
+//                    JOptionPane.showMessageDialog(null, "Please Make Note of your Reference Number: "+ refNumber, "IMPORTANT MESSAGE", JOptionPane.INFORMATION_MESSAGE);
+//                } catch (SQLException ex) {
+//                    throw new RuntimeException(ex);
+//                }
+//            }
+//        });
 
         saveButton.addActionListener(new ActionListener() {
             @Override
@@ -225,19 +227,31 @@ public class StudentForm extends JFrame implements Serializable
                     if (button.isSelected()) {
                         if (button.getText().equals("Compliant")) {
                             //System.out.println("compliant");""
-                            student=new Student(refField,idField,fNameField,lNameField,emailField,contactNumberField,"Compliant",complaintTypeBox,DetailField,"You should get a lecturer by thursday Miss Roye, sorry for any inconvenienced caused");
+                        	DBClient dbClient = new DBClient();
+                            Student student=new Student(refField,idField,fNameField,lNameField,emailField,contactNumberField,"Compliant",complaintTypeBox,DetailField,"You should get a lecturer by thursday Miss Roye, sorry for any inconvenienced caused");   
+                            dbClient.sendAction("Add Student");
+                            System.out.println("Message sent to server");
+                            dbClient.sendStudent(student);
+        					System.out.println("Record sent to the server");
+        					dbClient.receiveResponse();
+        					System.out.println("response received from server");
+
                         } else {
                             if (button.getText().equals("Query")) {
                                 //System.out.println("query");
-                                student=new Student(refField,idField,fNameField,lNameField,emailField,contactNumberField,"Query",queryTypeBox,DetailField,"hi");
+                            	DBClient dbClient = new DBClient();
+                            	Student student=new Student(refField,idField,fNameField,lNameField,emailField,contactNumberField,"Query",queryTypeBox,DetailField,"hi");
+                            	dbClient.sendAction("Add Student");
+                                System.out.println("Message sent to server");
+                                dbClient.sendStudent(student);
+            					System.out.println("Record sent to the server");
+            					dbClient.receiveResponse();
+            					System.out.println("response received from server");
                             }
                         }
                     }
                 }
 
-
-
-                DBClient.createRecord(student);
                 refNumber.setText("");
                 idNumber.setText("");
                 firstName.setText("");

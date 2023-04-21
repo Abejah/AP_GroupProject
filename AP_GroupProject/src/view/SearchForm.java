@@ -19,21 +19,26 @@ public class SearchForm extends JFrame implements ActionListener{
     private JTextField idSearchField;
     private JButton searchButton;
     private JTextArea resultsArea;
-    private String search,id;
-    private String[] data=new String[10];
-    private String[] columnNames={"Reference Number","Id Number", "First Name", "Last Name", "Email", "Contact Number", "Issue Type","Issue", "Issue Details", "Responses"};
-    public DBClient db;
-    public Student student=new Student();
-    private Object[][] allData=new Object[10][10];
-    private DefaultTableModel model;
-    private JTable table;
     private JScrollPane scrollPane;
     
+    public Student student=new Student();
+    
+    
+//    private String search,id;
+//    private String[] data=new String[10];
+//    private String[] columnNames={"Reference Number","Id Number", "First Name", "Last Name", "Email", "Contact Number", "Issue Type","Issue", "Issue Details", "Responses"};
+//    public DBClient db;
+//    
+//    private Object[][] allData=new Object[10][10];
+//    private DefaultTableModel model;
+//    private JTable table;
+ 
+//    
     
 
     public SearchForm()
     {
-    	this.db= new DBClient();
+    	//this.db= new DBClient();
     	//this.student=new Student();
 
        
@@ -55,10 +60,8 @@ public class SearchForm extends JFrame implements ActionListener{
         resultsArea.setLineWrap(true);
         resultsArea.setWrapStyleWord(true);
         scrollPane = new JScrollPane();
-        model =new DefaultTableModel(allData, columnNames);
-        table =new JTable(model);
-        scrollPane.add(table);
-        scrollPane.setBounds(10, 60, 700, 500);
+        JScrollPane scrollPane = new JScrollPane(resultsArea);
+        scrollPane.setBounds(10, 60, 700, 600);
        
 
         searchField.setForeground(Color.GRAY);
@@ -101,7 +104,7 @@ public class SearchForm extends JFrame implements ActionListener{
             }
         });
 
-        searchButton.addActionListener(this);
+       
         
         
         add(searchField);
@@ -109,7 +112,24 @@ public class SearchForm extends JFrame implements ActionListener{
         add(searchButton);
         add(scrollPane);
         
-        //add(resultsArea);
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String search = searchField.getText();
+                String id= idSearchField.getText();
+
+                //DBClient lient =new DBClient();
+                //Student students = DBClient.(search,id);
+                
+                DBClient dbClient =new DBClient();
+                dbClient.sendAction("Find Student");
+                dbClient.sendStudentInfo(search, id);
+                student= dbClient.receiveResponse();
+
+                resultsArea.append(student.toString());
+            }
+        });
+        
         
 
         setBounds(250,30,781, 650);
@@ -121,63 +141,24 @@ public class SearchForm extends JFrame implements ActionListener{
 //    private void displayTable(Student[] data) {
 //        StringBuilder sb = new StringBuilder();
 //
-////        for (Student cell : data) {
-////            sb.append(cell).append(" ");
-////        }
-////        sb.append("\n");
+//        for (Student cell : data) {
+//            sb.append(cell).append(" ");
+//        }
+//        sb.append("\n");
 //
 //        resultsArea.setText(sb.toString());
-
-    //}
+//
+//    }
 
     public static void main(String[] args) {
         SearchForm searchForm=new SearchForm();
         searchForm.setVisible(true);
     }
-    
 	@Override
-	public void actionPerformed(ActionEvent e) 
-	{
-		if(e.getSource()==searchButton) 
-		{
-			search = searchField.getText();
-	        id= idSearchField.getText();
-			student = db.findIssue(search,id);
-			
-			
-	        data[0]=student.getRefNumber();
-	        data[1]=student.getIdNumber();
-	        data[2]=student.getFirstName();
-	        data[3]=student.getLastName();
-	        data[4]=student.getEmail();
-	        data[5]=""+student.getContactNumber();
-	        data[6]=student.getIssueType();
-	        data[7]=student.getIssue();
-	        data[8]=student.getIssueDetails();
-	        data[9]=student.getResponses();
-	        
-	       
-	        
-	        
-	        
-	     // Repeat the one-dimensional array in the two-dimensional array
-	        for (int i = 0; i < allData.length; i++)
-	        {
-	        	for(int j=0; j<data.length; j++) 
-				{
-		   
-		        	allData[i][j]=data[j % data.length];
-		        	table.setValueAt(allData, i, j);
-	
-				}
-	            
-	        }
-	        System.out.println(""+ allData[0][0]);
-	        
-	        
-		}
-	        
-         
-			
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
+    
+
 }

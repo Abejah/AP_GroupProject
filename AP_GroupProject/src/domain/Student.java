@@ -1,7 +1,10 @@
 package domain;
+import java.io.Serializable;
 
-public class Student
+public class Student implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+	
     private String refNumber;
     private String idNumber;
     private String firstName;
@@ -142,7 +145,7 @@ public class Student
 
     @Override
     public String toString() {
-        return ("Reference Number: "+ refNumber +"ID Number: "+ idNumber +"\nFirst Name:"+ firstName +"\nLast Name: "+ lastName + "\nemail: "+ email
+        return ("Reference Number: "+ refNumber +"\nID Number: "+ idNumber +"\nFirst Name:"+ firstName +"\nLast Name: "+ lastName + "\nemail: "+ email
                 +"\nContact Number: "+ contactNumber +"\nIssue Type: "+ issueType +"\nIssue: "+ issue +"\nIssue Details: "+
                 issueDetails + "\nResponses:"+ responses + "\n");
 
