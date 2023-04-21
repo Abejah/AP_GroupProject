@@ -1,91 +1,82 @@
 package client;
 
-import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
 
-import javax.swing.JOptionPane;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
-
-import factories.DBConnectorFactory;
-import view.Administration;
-import view.LoginPage;
-import view.Student;
-
-public class Client extends Administration implements Serializable{
-
-	private static final long serialVersionUID = 1L;
-	private static Connection dbConn = null;
-	private static Statement stmt;
-	//private static ResultSet result;
-	//private static Administration ad = new Administration();
+public class Client {
 	
-	//initializing logger to class
-    private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(LoginPage.class); 
+	private DataOutputStream objOs;
+	private DataInputStream objIs;
+	private Socket connectionSocket;
 	
-	public Client() {
-		dbConn = DBConnectorFactory.getConnection();
+	public Client(String username){
+		createConnection();
+		configureConnection(username);
 	}
-
-	//creates a an administration and adds them to the admin table in the database
-	public static void createRecord(Administration ad) {
-		   String firstName = ad.getFirstName();
-			String lastName = ad.getLastName();
-			String userName = ad.getUserName();
-			String password = ad.getPassowrd();
-			String emailId = ad.getEmail();
-			String mobileNumber = ad.getMobileNumber();
-		
-		String insertSQL = "INSERT INTO admin values('" + firstName + "','" + lastName + "','" + userName + "','" +
-                password + "','" + emailId + "','" + mobileNumber + "')";
+	
+	public void createConnection() {
 		try {
-
-            stmt = dbConn.createStatement();
-            int x = stmt.executeUpdate(insertSQL);
-            if (x == 1) {
-            	JOptionPane.showMessageDialog(null, "Account created");
-            } else {
-            	JOptionPane.showMessageDialog(null, "Already exist");
-            }
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        } 
+			//create a socket to connect to the server
+			this.connectionSocket = new Socket("localhost", 8000);
+			System.out.println("Connected to server.");
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
 	}
-
-	//creates a student and adds them to the student table in the database
-	public static void createStudentRecord(Student st) {
-		    String firstName =st.getFirstName();
-			String lastName = st.getLastName();
-			String userName = st.getUserName();
-			String password = st.getPassowrd();
-			String emailId = st.getEmail();
-			String mobileNumber = st.getMobileNumber();
-		
-		String insertSQL = "INSERT INTO student values('" + firstName + "','" + lastName + "','" + userName + "','" +
-             password + "','" + emailId + "','" + mobileNumber + "')";
+	
+	public void configureConnection(String username) {
 		try {
-
-         stmt = dbConn.createStatement();
-         int x = stmt.executeUpdate(insertSQL);
-         if (x == 1) {
-         	JOptionPane.showMessageDialog(null, "Account created");
-         } else {
-         	JOptionPane.showMessageDialog(null, "Already exist");
-         }
-     } catch (Exception exception) {
-         exception.printStackTrace();
-     } 
-	
+			objOs = new DataOutputStream(connectionSocket.getOutputStream());
+			objIs = new DataInputStream(connectionSocket.getInputStream());
+			objOs.writeUTF(username);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
-
 	
-	public static void main(String[] args) {
-	
-		new Client();
-
+	public void sendMessage(String username, String messageToSend) {
+		try {
+			objOs.writeUTF(username);
+			objOs.writeUTF(messageToSend);
+			//System.out.println(username+" sent Message: "+messageToSend);
+			objOs.flush();
+		} catch (Exception e) {
+			System.err.println("Error sending message to server");
+			closeEverything(connectionSocket, objIs, objOs);
+		}
 	}
-
+	
+	public String listenForMessage() {
+		String messageGot,message = null, username = null;
+		
+        try {
+        	username=objIs.readUTF();
+        	message = objIs.readUTF();
+        	System.out.println(username+" : "+message);
+        } catch (IOException e) {
+            System.err.println("Error receiving message from server");
+            closeEverything(connectionSocket, objIs, objOs);
+        }
+        messageGot = (username+" : "+message);
+        return messageGot;
+    }
+	public void closeEverything(Socket socket, DataInputStream objIs, DataOutputStream objOs) {
+		try {
+			if (objIs!=null) {
+				objIs.close();
+			}
+			if (objOs!=null) {
+				objOs.close();
+			}
+			if (socket!=null) {
+				socket.close();
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}//end of closeEverything
 }
