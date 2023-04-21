@@ -97,10 +97,18 @@ public class DBClient extends Student implements Serializable
             e.printStackTrace();
         }
     }
-    
+
+    public void sendStudentId(String stuId) {
+        try {
+            outputStream.writeObject(stuId);
+            outputStream.flush();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
     public Student receiveResponse() {
     		Student student = new Student();
-    		Object[][] data = null;
         try {
             if(action.equalsIgnoreCase("Add Student")) {
                 Boolean flag = (Boolean) inputStream.readObject();
@@ -124,18 +132,20 @@ public class DBClient extends Student implements Serializable
                 }
                 //return student;
             }
-            if (action.equalsIgnoreCase("View All")) {
-               
+            
+            if(action.equalsIgnoreCase("Find StudentID")) {
+                
                 try {
-                	data = (Object[][])inputStream.readObject();
+                	student = (Student) inputStream.readObject();
 					
 				} catch (EOFException e) {
 					e.getMessage();
 				}
-                
+            
                 System.out.println(student);
                 if (student == null) {
                     JOptionPane.showMessageDialog(null, "Record could not be found", "Find Record Status", JOptionPane.ERROR_MESSAGE);
+                    
                 }
             }
 
@@ -149,28 +159,5 @@ public class DBClient extends Student implements Serializable
             e.printStackTrace();
         }
 		return student;
-    }
-    
-    public Object[][] receiveAll() {
-		Object[][] data = null;
-	    try {
-	        if (action.equalsIgnoreCase("View All")) {
-	            try {
-	            	data = (Object[][])inputStream.readObject();
-				} catch (EOFException e) {
-					e.getMessage();
-				}
-	            if (data == null) {
-	                JOptionPane.showMessageDialog(null, "Record could not be found", "Find Record Status", JOptionPane.ERROR_MESSAGE);
-	            }
-	        }
-	    }catch(ClassCastException ex) {
-	
-	    } catch (ClassNotFoundException e) {
-	        e.printStackTrace();
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	    }
-		return data;
     }
 }

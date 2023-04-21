@@ -14,32 +14,26 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.DefaultTableModel;
 
 import client.ChatClient;
-import client.DBClient;
 import domain.StudentServicesAdvisor;
 
 public class SSADashboard extends JFrame implements ActionListener{
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel panTop,panLeft,panBottom,panRight,panCentre,panRightTop,panRightBottom;
-	private JTextArea studentInfoTA;
+	private JTextArea studentInfoTA, complaintsTA;
+
 	public JTextArea chatTA;
 	private JButton viewBtn, sendBtn, logoutBtn, responseBtn;
 	private JTextField responseTxt;
 	private JCheckBox availableCheckBox;
 	private JList<String> complaintsList;
-	private JTable table;
-	private DefaultTableModel model;
-	private JScrollPane tableScrollPane, complaintScrollPane;
 	public StudentServicesAdvisor sSA;
-	private DBClient dbclient = new DBClient();
+	 
 	 
 	 public SSADashboard() {
 		setLayout(new GridLayout(2,1));
@@ -53,8 +47,9 @@ public class SSADashboard extends JFrame implements ActionListener{
 	}
 
 	 private void initializeComponents(){
-		 String[] complaints = { "Missing Lectures", "Financial Clearance", "Can't Login",
-		        "Can't Login"};
+		 String[] complaints = { "I cannot login to my account", "I cannot access my course materials", "I cannot enroll in a course",
+		        "I cannot submit an assignment", "I cannot view my grades", "I am having trouble with a quiz",
+		        "I need to reset my password" };
 		 
 		  complaintsList = new JList<>(complaints);
 		  complaintsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -79,29 +74,15 @@ public class SSADashboard extends JFrame implements ActionListener{
 		 //textAreas
 		 studentInfoTA = new JTextArea("Student Information");
 		 studentInfoTA.setEditable(false);
-
+		 
+		 complaintsTA = new JTextArea();
+		 complaintsTA.setPreferredSize(new Dimension(220, 250));
+		 complaintsTA.setEditable(false);
 		 
 		 chatTA = new JTextArea();
 		 chatTA.setPreferredSize(new Dimension(250, 250));
 		 chatTA.setEditable(false);
 		 
-		 //Table
-		// get table tada from client query
-		 dbclient.sendAction("View All");
-         Object[][] data = dbclient.receiveAll();
-		 String[] columnNames = { "Student ID", "First Name", "Last Name", "Issue Type", "Issue", "Details" };
-		 model = new DefaultTableModel(data, columnNames);
-		 
-         table = new JTable(model);         
-         table.setEnabled(false);
-         
-		 //Text Areas
-		 complaintScrollPane = new JScrollPane(complaintsList);
-		 complaintScrollPane.setPreferredSize(new Dimension(250, 250));
-
-         tableScrollPane = new JScrollPane(table);
-         tableScrollPane.setPreferredSize(new Dimension(950, 250));
-         
 		 //Main panels
 		 panTop=new JPanel(new GridLayout(1,3));
 		 panBottom = new JPanel(/*new GridLayout(1,3)*/);
@@ -142,7 +123,7 @@ public class SSADashboard extends JFrame implements ActionListener{
 		 panCentre.add(studentInfoTA);
 		 
 		 panLeft.add(new JLabel("Complaints from complaints table"));
-		 panLeft.add(complaintScrollPane);
+		 panLeft.add(complaintsTA.add(complaintsList));
 		 panLeft.add(viewBtn, BorderLayout.SOUTH);
 		 panLeft.add(responseBtn, BorderLayout.SOUTH);
 		 
@@ -150,7 +131,6 @@ public class SSADashboard extends JFrame implements ActionListener{
 		 panTop.add(panCentre);
 		 panTop.add(panRight);
 		 
-		 panBottom.add(tableScrollPane);
 		 panBottom.add(availableCheckBox);
 		 panBottom.add(logoutBtn);
 	 }
@@ -202,12 +182,6 @@ public class SSADashboard extends JFrame implements ActionListener{
 						}
 					});//end of send button action listener
 				}
-				if (!availableCheckBox.isSelected()) {
-			        sendBtn.setEnabled(false);
-			        responseTxt.setEditable(false);
-			        responseTxt.setText("");
-			        System.out.println("\nDisconnected from Server \nAvailability set to: unavailable");
-			   }
 			}
 		});//end of action listener for the check box
 	}
@@ -220,19 +194,18 @@ public class SSADashboard extends JFrame implements ActionListener{
             
             // get student details for selected complaint from database
 			//**********Dummy values below********
-            String studentId = "1001";
+            int studentId = 12345;
             String firstName = "John";
             String lastName = "Doe";
             String email = "johndoe@example.com";
             String contact = "555-1234";
-            String typeOfIssue = "Complaint";
-            String issue = "Missing Lecturers"; 
-            String detailsOfIssue = "UM1 Sociology hasn't had a lecture since \nthe begining of semester";
+            String typeOfIssue = "Login Issue";
+            String detailsOfIssue = "I forgot my password and cannot reset it.";
             
             // display student details
             studentInfoTA.setText("ID: " + studentId + "\nFirst Name: " + firstName + "\nLast Name: " + lastName
-                    + "\nEmail: " + email + "\nContact: " + contact + "\nType of Issue: " + typeOfIssue 
-                    + "\nIssue: " +issue+"\nDetails of Issue: "+ detailsOfIssue);
+                    + "\nEmail: " + email + "\nContact: " + contact + "\nType of Issue: " + typeOfIssue + "\nDetails of Issue: "
+                    + detailsOfIssue);
 		}
 		if (e.getSource() == responseBtn) {
             // get selected complaint
@@ -257,6 +230,12 @@ public class SSADashboard extends JFrame implements ActionListener{
 		    	chatTA.append(message+"\n");
 		    }
 		}
+		if (!availableCheckBox.isSelected()) {
+	        sendBtn.setEnabled(false);
+	        responseTxt.setEditable(false);
+	        responseTxt.setText("");
+	        System.out.println("\nDisconnected from Server \nAvailability set to: unavailable");
+	   }
        if (e.getSource() == logoutBtn) {
 		   JOptionPane.showMessageDialog(null, "Thanks Come again \n Return to authentication");
 		   //should actually call for authentication;

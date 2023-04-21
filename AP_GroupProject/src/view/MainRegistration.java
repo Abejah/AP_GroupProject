@@ -4,10 +4,6 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -17,10 +13,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import org.apache.logging.log4j.core.jmx.Server;
-
 import client.Client;
-
 
 
 public class MainRegistration extends JFrame{
@@ -33,21 +26,17 @@ public class MainRegistration extends JFrame{
     private JTextField username;
     private JTextField mob;
     private JPasswordField passwordField;
-    private JButton btnNewButton1;   //Register Admin/ Supervisor
-    private JButton btnNewButton2;   //Register Student
-    private JButton btnNewButton3;   //Register Advisor
-    private JButton btnNewButton4;   //login page button
+    private JButton btnNewButton1;
+    private JButton btnNewButton2;
     
     private Administration administrator = new Administration();  //instantiate a new instance of the administration class
-    
-    private SSAdvisor ssa = new SSAdvisor();   //instantiate a new instance of the SSAdvisor class
     
     private Student student = new Student();   //instantiate a new instance of the student class
     
     public MainRegistration() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(450, 190, 1014, 850);
-        setResizable(true);
+        setBounds(450, 190, 1014, 597);
+        setResizable(false);
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPane);
@@ -124,8 +113,8 @@ public class MainRegistration extends JFrame{
         passwordField.setBounds(707, 235, 228, 50);
         contentPane.add(passwordField);
 
-      //this button registers a Supervisor
-        btnNewButton1 = new JButton("Register Supervisor");
+      //this button registers an admin
+        btnNewButton1 = new JButton("Register Admin");
         btnNewButton1.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             	administrator.setFirstName(firstname.getText());
@@ -142,19 +131,8 @@ public class MainRegistration extends JFrame{
                     JOptionPane.showMessageDialog(btnNewButton1, "Enter a valid mobile number");
                 }
                 
-                Client cli = new Client();
-                Administration ad = new Administration(firstname.getText(), lastname.getText(), username.getText(), passwordField.getText(), email.getText(), mob.getText());
-                cli.sendAction("Add Supervisor");
-                System.out.println("Message sent to the server");
-                cli.sendSupervisor(ad);
-                System.out.println("Record sent to the server");
-                cli.receiveResponse();
-                System.out.println("Response received from the server");
-                
-                //Server.createAdministrationRecord(administrator);
+                Client.createRecord(administrator);
             }
-            
-            LoginPage login = new LoginPage();
         });
         
         //this button registers a student
@@ -175,63 +153,9 @@ public class MainRegistration extends JFrame{
                     JOptionPane.showMessageDialog(btnNewButton2, "Enter a valid mobile number");
                 }
                 
-                Client cli = new Client();
-                Student st = new Student(firstname.getText(), lastname.getText(), username.getText(), passwordField.getText(), email.getText(), mob.getText());
-                cli.sendAction("Add Student");
-                System.out.println("Message sent to the server");
-                cli.sendStudent(st);
-                System.out.println("Record sent to the server");
-                cli.receiveResponse();
-                System.out.println("Response received from the server");
-                //Server.createStudentRecord(student);
-                
-            }
-            LoginPage login = new LoginPage();
-        });
-        
-      //this button registers an advisor
-        btnNewButton3 = new JButton("Register Advisor");
-        btnNewButton3.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            	ssa.setFirstName(firstname.getText());
-            	ssa.setLastName(lastname.getText());
-            	ssa.setEmail(email.getText());
-            	ssa.setPassowrd(passwordField.getText());
-            	ssa.setUserName(username.getText());
-            	ssa.setMobileNumber(mob.getText());
-      
-                int len = mob.getText().length();
-                
-                //NOTE: THE MOBILE NUMBER MUST BE LESS THAN 10 !!!!!!!
-                if (len > 10) {
-                    JOptionPane.showMessageDialog(btnNewButton1, "Enter a valid mobile number");
-                }
-                
-                Client cli = new Client();
-                SSAdvisor ss = new SSAdvisor(firstname.getText(), lastname.getText(), username.getText(), passwordField.getText(), email.getText(), mob.getText());
-                cli.sendAction("Add Advisor");
-                System.out.println("Message sent to the server");
-                cli.sendAdvisor(ss);
-                System.out.println("Record sent to the server");
-                cli.receiveResponse();
-                System.out.println("Response received from the server");
-                
-                //Server.createSSAdvisorRecord(ssa);
-            }
-            LoginPage login = new LoginPage();
-        });
-        
-        //this button is linked to login page
-        btnNewButton4 = new JButton("Login");
-        btnNewButton4.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            	LoginPage lg = new LoginPage();
-            	lg.setVisible(true);
-            	setVisible(false);
+                Client.createStudentRecord(student);
             }
         });
-        
         
         btnNewButton1.setFont(new Font("Tahoma", Font.PLAIN, 22));
         btnNewButton1.setBounds(150, 447, 259, 74);
@@ -240,14 +164,6 @@ public class MainRegistration extends JFrame{
         btnNewButton2.setFont(new Font("Tahoma", Font.PLAIN, 22));
         btnNewButton2.setBounds(550,447 , 259, 74);
         contentPane.add(btnNewButton2);
-        
-        btnNewButton3.setFont(new Font("Tahoma", Font.PLAIN, 22));
-        btnNewButton3.setBounds(150, 570 , 259, 74);
-        contentPane.add(btnNewButton3);
-        
-        btnNewButton4.setFont(new Font("Tahoma", Font.PLAIN, 22));
-        btnNewButton4.setBounds(550, 570 , 259, 74);
-        contentPane.add(btnNewButton4);
         
     } 
         
@@ -258,7 +174,6 @@ public class MainRegistration extends JFrame{
             public void run() {
                 try {
                 	MainRegistration frame = new MainRegistration();
-                	frame.setTitle("University of Technology Registration Form");
                     frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();

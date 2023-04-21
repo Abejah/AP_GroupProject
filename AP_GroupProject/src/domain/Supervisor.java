@@ -1,59 +1,87 @@
 package domain;
 
+
 public class Supervisor {
-	private String iD;
-	private String name;
-	private String password;
 	
-	public Supervisor() {
-		super();
-		this.iD = "";
-		this.name = "";
-		this.password = "";
-	}
-	public Supervisor(String iD, String name, String password) {
-		super();
-		this.iD = iD;
-		this.name = name;
-		this.password = password;
-	}
+		private String staffID;
+	    private String firstName;
+	    private String lastName;
+	    private String email;
+	    private String password;
+
+	    public Supervisor()
+	    {
+	        this.staffID = "";
+	        this.firstName = "";
+	        this.lastName = "";
+	        this.email = "";
+	        this.password = "";
+	    }
+
+	    public Supervisor(String staffID, String firstName, String lastName, String email, String password)
+	    {
+	        this.staffID = staffID;
+	        this.firstName = firstName;
+	        this.lastName = lastName;
+	        this.email = email;
+	        this.password = password;
+	    }
 
 
-	public String getiD() {
-		return iD;
-	}
+	    public Supervisor(Supervisor Supervisor) {
+	        this.firstName = Supervisor.firstName;
+	        this.lastName = Supervisor.lastName;
+	        this.email = Supervisor.email;
+	        this.password = Supervisor.password;
+	    }
+	    
+	    //getters and setters
+		public String getStaffID() {
+			return staffID;
+		}
 
+		public void setStaffID(String staffID) {
+			this.staffID = staffID;
+		}
 
-	public void setiD(String iD) {
-		this.iD = iD;
-	}
+		public String getFirstName() {
+			return firstName;
+		}
 
+		public void setFirstName(String firstName) {
+			this.firstName = firstName;
+		}
 
-	public String getName() {
-		return name;
-	}
+		public String getLastName() {
+			return lastName;
+		}
 
+		public void setLastName(String lastName) {
+			this.lastName = lastName;
+		}
 
-	public void setName(String name) {
-		this.name = name;
-	}
+		public String getEmail() {
+			return email;
+		}
 
+		public void setEmail(String email) {
+			this.email = email;
+		}
 
-	public String getPassword() {
-		return password;
-	}
+		public String getPassword() {
+			return password;
+		}
 
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-
-	@Override
-	public String toString() {
-		return "ID: " + iD + "\nName: " + name + "Password: " + password;
-	}
-	
-	
-	
+		public void setPassword(String password) {
+			this.password = password;
+		}
+		
+		  @Override
+		    public String toString()
+		    {
+		        return "Supervisor{" +
+		                "staffID: '" + staffID + '\'' + ", firstName: '" + firstName + '\'' +
+		                ", lastName: '" + lastName + '\'' + ", email: '" + email + '\'' + 
+		                ", password: '" + password + '\'' + '}';
+		    }
 }
