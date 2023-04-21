@@ -18,7 +18,7 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 public class StudentRegistration extends JFrame{
-
+/*
 
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
@@ -182,5 +182,5 @@ public class StudentRegistration extends JFrame{
 	}   
      
 
-	
+	*/
 }
