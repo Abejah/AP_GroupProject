@@ -142,20 +142,19 @@ public class StudentServer implements Serializable
  	private Object[][] getDataFromDatabase() {
  		Object[][] data = null;
  	     // Create a query string to select data from the students table in the studentsdb database
- 	     //String query = "SELECT refNumber, idNumber,firstName,lastName,email,contactNumber,issueType,issue,issueDetails,responses FROM studentsdb.students WHERE issue ='"+issue+"' AND idNumber ='"+stuId+"' ;";
- 	    String sql = "SELECT * FROM studentsdb.students";
+ 	    String query = "SELECT * FROM studentsdb.students;";
  	     try {
  	         // Create a Statement object to execute the query
- 	         statement= connection.createStatement();
+ 	    	statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
  	         // Execute the query and store the result in a ResultSet object
- 	         resultSet = statement.executeQuery(sql);
+ 	         resultSet = statement.executeQuery(query);
  	         
  	         // Get the number of columns in the result set
              ResultSetMetaData metaData = resultSet.getMetaData();
              int numColumns = metaData.getColumnCount();
 
           // Initialize data array with number of rows in the result set
-             resultSet.last();
+             //resultSet.last();
              int numRows = resultSet.getRow();
              resultSet.beforeFirst();
              data = new Object[numRows][numColumns];
@@ -163,9 +162,18 @@ public class StudentServer implements Serializable
              // Retrieve data from result set and store in data array
              int row = 0;
              while (resultSet.next()) {
-                 for (int col = 0; col < numColumns; col++) {
-                     data[row][col] = resultSet.getObject(col + 1);
-                 }
+                 Object[] rowData = new Object[numColumns];
+                 rowData[0] = resultSet.getString(1); // Replace with the appropriate column index for each field
+                 rowData[1] = resultSet.getString(2);
+                 rowData[2] = resultSet.getString(3);
+                 rowData[3] = resultSet.getString(4);
+                 rowData[4] = resultSet.getString(5);
+                 rowData[5] = resultSet.getInt(6);
+                 rowData[6] = resultSet.getString(7);
+                 rowData[7] = resultSet.getString(8);
+                 rowData[8] = resultSet.getString(9);
+                 rowData[9] = resultSet.getString(10);
+                 data[row] = rowData;
                  row++;
              }
 
@@ -205,7 +213,7 @@ public class StudentServer implements Serializable
                         String stuId = (String) inputStream.readObject();
                         stuObj = findStudentByID(issue,stuId);
                         outputStream.writeObject(stuObj);
-					}else if (action.equals("View All")) {
+					}else if (action.equals("View All")) {//getDataFromDatabase
                         data = getDataFromDatabase();
                         outputStream.writeObject(data);
 					}
