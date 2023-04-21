@@ -1,6 +1,8 @@
 package view;
 
-public class Administration {
+import java.io.Serializable;
+
+public class Administration implements Serializable{
 private String firstName;
 private String lastName;
 private String userName;
