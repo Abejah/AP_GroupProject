@@ -176,7 +176,7 @@ private static final long serialVersionUID = 1L;
                
                 if(rs.next()) {
                 JOptionPane.showMessageDialog(null, "You are logged in as student");
-                StudentDashboard menu = new StudentDashboard();
+                SSADashboard menu = new SSADashboard();
                 menu.setVisible(true);
                 setVisible(false);
                

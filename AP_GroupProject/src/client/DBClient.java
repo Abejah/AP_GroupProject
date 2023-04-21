@@ -5,125 +5,159 @@ import javax.swing.*;
 import domain.Student;
 import factories.DbConn;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.sql.*;
 
 public class DBClient extends Student implements Serializable
 {
 	private static final long serialVersionUID = 1L;
-    private static Connection dbConn=null;
-    private static Statement statement;
-    private static ResultSet result;
-    private static Student student=new Student();
-    
+	private Socket socket;
+	private ObjectOutputStream outputStream;
+	private ObjectInputStream inputStream;
+	String action;
+  
 
-    public DBClient()
-    {
-       dbConn=DbConn.getConnection();
+    public DBClient() {
+        this.createConnection();
+        this.configureStreams();
+       
+      
     }
 
-    public static void createRecord(Student student)
-    {
-        String idNumber=student.getIdNumber();
-        String firstName= student.getFirstName();
-        String lastName= student.getLastName();
-        String email= student.getEmail();
-        int contactNumber= student.getContactNumber();
-        String issueType= student.getIssueType();
-        String issue= student.getIssue();
-        String issueDetail= student.getIssueDetails();
-        String responses=student.getResponses();
-
-        String createRecordSQL="INSERT INTO studentsdb.students(idNumber, firstName, lastName, email, contactNumber, issueType, issue, issueDetails,responses)" 
-        + "VALUES('"+idNumber+"', '"+firstName+"','"+lastName+"','"+email+"','"+contactNumber+"','"+issueType+"','"+issue+"','"+issueDetail+"','"+responses+"');";
+    private void createConnection() {
 
         try {
-            statement = dbConn.createStatement();
-            int inserted = statement.executeUpdate(createRecordSQL);
+            socket = new Socket("127.0.0.1", 8888);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
 
-            if(inserted == 1) {
-                JOptionPane.showMessageDialog(null, "Student Information Stored Successfully", "Student Insertion Status", JOptionPane.INFORMATION_MESSAGE);
-            }else {
-                JOptionPane.showMessageDialog(null, "Student Information Stored Unsuccessfully", "Student Insertion Status", JOptionPane.ERROR_MESSAGE);
-            }
-
-        }catch(SQLSyntaxErrorException e) {
-            JOptionPane.showMessageDialog(null, "SQL Syntax Excpetion Detected: " + e.getMessage(), "Student Database Connection", JOptionPane.ERROR_MESSAGE);
-        }catch(SQLException e) {
-            JOptionPane.showMessageDialog(null, "SQL Exception Error: " + e.getMessage(), "Student Database Connection", JOptionPane.ERROR_MESSAGE);
-        }catch(Exception e) {
-            JOptionPane.showMessageDialog(null, "Unexpected Error: " + e.getMessage() + "Try again later", "Student Database Connection", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    public Student findIssue(String Issue,String id) {
-        String findStudentSQL = "SELECT refNumber, idNumber,firstName,lastName,email,contactNumber,issueType,issue,issueDetails,responses FROM studentsdb.students WHERE issue ='"+Issue+"' AND idNumber ='"+id+"' ;";
-
+    private void configureStreams() {
         try {
-            statement =dbConn.createStatement();
-            result = statement.executeQuery(findStudentSQL);
+            //Creates an input stream to receive data from the server
+            outputStream = new ObjectOutputStream(socket.getOutputStream());
+            //Creates an output stream to send data to the server
+            inputStream = new ObjectInputStream(socket.getInputStream());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
-            if (result.next()) {
-            	student.setRefNumber(result.getString("refNumber"));
-                student.setIdNumber(result.getString("idNumber"));
-                student.setFirstName(result.getString("firstName"));
-                student.setLastName(result.getString("lastName"));
-                student.setEmail(result.getString("email"));
-                student.setContactNumber(result.getInt("contactNumber"));
-                student.setIssueType(result.getString("issueType"));
-                student.setIssue(result.getString("issue"));
-                student.setIssueDetails(result.getString("issueDetails"));
-                student.setResponses(result.getString("responses"));                         
+    public void closeConnection() {
+        try {
+            outputStream.close();
+            inputStream.close();
+            socket.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    public void sendAction(String action) {
+        this.action = action;
+        try {
+            outputStream.writeObject(action);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    public void sendStudent(Student stuObj) {
+        try {
+            outputStream.writeObject(stuObj);
+            outputStream.flush();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    public void sendStudentInfo(String issue,String stuId) {
+        try {
+            outputStream.writeObject(issue);
+            outputStream.writeObject(stuId);
+            outputStream.flush();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    public void sendStudentId(String stuId) {
+        try {
+            outputStream.writeObject(stuId);
+            outputStream.flush();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    public Student receiveResponse() {
+    		Student student = new Student();
+        try {
+            if(action.equalsIgnoreCase("Add Student")) {
+                Boolean flag = (Boolean) inputStream.readObject();
+                if (flag == true) {
+                    JOptionPane.showMessageDialog(null, "Record added successfully", "Add Record Status", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+            if(action.equalsIgnoreCase("Find Student")) {
+               
+                try {
+                	student = (Student) inputStream.readObject();
+					
+				} catch (EOFException e) {
+					e.getMessage();
+				}
                 
-                return student;
+                System.out.println(student);
+                if (student == null) {
+                    JOptionPane.showMessageDialog(null, "Record could not be found", "Find Record Status", JOptionPane.ERROR_MESSAGE);
+                    
+                }
+                //return student;
             }
-        }catch(SQLSyntaxErrorException e) {
-            JOptionPane.showMessageDialog(null, "SQL Syntax Excpetion Detected: " + e.getMessage(), "Student Database Connection", JOptionPane.ERROR_MESSAGE);
-        }catch(SQLException e) {
-            JOptionPane.showMessageDialog(null, "SQL Exception Error: " + e.getMessage(), "Student Database Connection", JOptionPane.ERROR_MESSAGE);
-        }catch(Exception e) {
-            JOptionPane.showMessageDialog(null, "Unexpected Error: " + e.getMessage() + "Try again later", "Student Database Connection", JOptionPane.ERROR_MESSAGE);
-        }
-		return null;
-        
-    }
-    
-    
-    public ResultSet getResultSet() {
-        return result;
-    }
-
-    public Student getInfoFromDatabase(String id) {
-        String findid= "SELECT idNumber,firstName,lastName,email,contactNumber FROM studentsdb.students WHERE idNumber ='"+id+"';";
-        try {
-            statement =dbConn.createStatement();
-            result= statement.executeQuery(findid);
-
-            if (result.next()) {
-                String idNumber1 = result.getString("idNumber");
-                String firstName1 = result.getString("firstName");
-                String lastName1 = result.getString("lastName");
-                String email1 = result.getString("email");
-                int contactNumber1= result.getInt("contactNumber");
-
-
-                Student issues1=new Student();
-                issues1.setIdNumber(idNumber1);
-                issues1.setFirstName(firstName1);
-                issues1.setLastName(lastName1);
-                issues1.setEmail(email1);
-                issues1.setContactNumber(contactNumber1);
-
-                return issues1;
+            
+            if(action.equalsIgnoreCase("Find StudentID")) {
+                
+                try {
+                	student = (Student) inputStream.readObject();
+					
+				} catch (EOFException e) {
+					e.getMessage();
+				}
+            
+                System.out.println(student);
+                if (student == null) {
+                    JOptionPane.showMessageDialog(null, "Record could not be found", "Find Record Status", JOptionPane.ERROR_MESSAGE);
+                    
+                }
             }
-        }catch(SQLSyntaxErrorException e) {
-            JOptionPane.showMessageDialog(null, "SQL Syntax Excpetion Detected: " + e.getMessage(), "Student Database Connection", JOptionPane.ERROR_MESSAGE);
-        }catch(SQLException e) {
-            JOptionPane.showMessageDialog(null, "SQL Exception Error: " + e.getMessage(), "Student Database Connection", JOptionPane.ERROR_MESSAGE);
-        }catch(Exception e) {
-            JOptionPane.showMessageDialog(null, "Unexpected Error: " + e.getMessage() + "Try again later", "Student Database Connection", JOptionPane.ERROR_MESSAGE);
-        }
-        return null;
 
+        }catch(ClassCastException ex) {
+
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+		return student;
     }
 }

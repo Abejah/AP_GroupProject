@@ -2,10 +2,7 @@ package view;
 
 import java.io.Serializable;
 
-public class Student implements Serializable
-{
-	
-private static final long serialVersionUID = 1L;
+public class SSAdvisor implements Serializable{
 private String firstName;
 private String lastName;
 private String userName;
@@ -13,7 +10,7 @@ private String passowrd;
 private String email;
 private String mobileNumber;
 
-public Student() {
+public SSAdvisor() {
 	this.firstName = "";
 	this.lastName = "";
 	this.userName = "";
@@ -22,7 +19,7 @@ public Student() {
 	this.mobileNumber = "";
 }
 
-public Student(String firstName, String lastName, String userName, String passowrd, String email,
+public SSAdvisor(String firstName, String lastName, String userName, String passowrd, String email,
 		String mobileNumber) {
 	this.firstName = firstName;
 	this.lastName = lastName;
@@ -89,7 +86,6 @@ public String toString() {
 			"\nEmail: " + email + 
 			"\nMobile Number: " + mobileNumber + "\n";
 }
-
 
 
 
