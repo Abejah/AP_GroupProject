@@ -1,101 +1,220 @@
 package server;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-public class Server {
+import javax.swing.JOptionPane;
+
+import view.Administration;
+import view.SSAdvisor;
+import view.Student;
+
+
+public class Server implements Serializable{
+
+	private static final long serialVersionUID = 1L;
 	private ServerSocket serverSocket;
 	private Socket connectionSocket;
+	private static Connection dbConn = null;
+	private static Statement stmt;
+	private static ObjectOutputStream objO;
+	private static ObjectInputStream objI;
 
 	public Server() {
-		try {
-			serverSocket = new ServerSocket(8000);
-			System.out.println("Server started at " + new java.util.Date()+"\n");
-			while(!serverSocket.isClosed()) {
-				connectionSocket = serverSocket.accept();//waits for a client to connect and send's that clients socket object to socket
-				System.out.println("A new client has connected at " + new java.util.Date());
-				
-				ClientHandler clientHandler = new ClientHandler(connectionSocket);//responsible for communicating with the client
-								
-				Thread thread = new Thread((Runnable)clientHandler);//Passes instance of the clientHandler class into a new thread
-				thread.start();//runs the thread
-				System.out.println("  Thread Id: "+thread.getId()+"\n");
-			}//end of while loop
-		} catch (IOException e) {
-			System.err.println("Error: "+e.getMessage());
-			closeServerSocket();
-		}
+		
+		this.createConnection();
+		this.request();
 	}
 	
-	public void closeServerSocket() {//for error handling...if theres an error 
+	public void createConnection() {
 		try {
-			if (serverSocket != null) {
-				serverSocket.close();//close the server
-			}
-		}catch (Exception e) {
-			System.err.println("Error: "+e.getMessage());
+			//creating a connection on server 8888
+			serverSocket = new ServerSocket(8888);		
+			System.out.println("Server started");
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public static void main(String[] args) throws IOException {//exception added to method signature alternative to try-catch
-		new Server();	
+	public void configureStreams() {
+		try {
+			objO = new ObjectOutputStream(connectionSocket.getOutputStream());
+			objI = new ObjectInputStream(connectionSocket.getInputStream());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
-	//inner class
-	public class ClientHandler implements Runnable{
-		private Socket clientSocket;
-		private DataOutputStream objOs;
-        private DataInputStream objIs;
-		private String clientUsername;
-		private String messageFromClient;
-	
-		public ClientHandler(Socket clientSocket) {
-			this.clientSocket = clientSocket;
-			try {				
-				objOs = new DataOutputStream(clientSocket.getOutputStream());
-                objIs = new DataInputStream(clientSocket.getInputStream());
-                clientUsername=objIs.readUTF();
-                //System.out.println(clientUsername+" has joined the chat");//Prints to console
-			} catch (IOException e) {
-				 System.err.println("Error creating input/output streams for client: " + e.getMessage());
-				closeEverything(clientSocket, objIs, objOs);
+	public static Connection getConnection() {
+		if(dbConn == null) {
+			String url = "jdbc:mysql://localhost:3307/dbproject";	//localhost:3307 is used with webserver
+			try {
+				dbConn =DriverManager.getConnection(url, "root", "usbw"); //using web server, therefore password is "usbw" 
+				JOptionPane.showMessageDialog(null, "Connection Established", "JDBC Connection Status", JOptionPane.INFORMATION_MESSAGE);
+			} catch (SQLException e) {
+				System.err.println("SQL Exception: " + e.getMessage());
+			} catch(Exception e) {
+				System.err.println("Unexpected Error: " + e.getMessage());
 			}
 		}
 		
-		public void run() {//what is done on each seperate threads
-			try {
-				while(clientSocket.isConnected()) {
-					clientUsername=objIs.readUTF();//listens for usernames
-					messageFromClient=objIs.readUTF();//listens for messages
-					System.out.println("Message from "+clientUsername+" >> "+messageFromClient);
-					
-					objOs.writeUTF(clientUsername);//writes username
-					objOs.writeUTF(messageFromClient);//writes message
-					//System.out.println("Message sent from server to client >> "+clientUsername+" : "+messageFromClient);//jus to see
-					objOs.flush();
-				}
-			}catch (Exception e) {
-				System.err.println("Client "+clientUsername+" disconnected");
+		return dbConn;
+		
+	}
+	
+	public void closeConnection() {
+		try {
+			objO.close();
+			objI.close();
+			
+		}catch (Exception e) {
+			System.err.println("Error: "+e.getMessage());
+			//e.printStackTrace();
+		}
+	}
+	
+	//creates a an Supervisor and adds them to the admin table in the database
+	public static void createAdministrationRecord(Administration ad) {
+		    String firstName = ad.getFirstName();
+			String lastName = ad.getLastName();
+			String userName = ad.getUserName();
+			String password = ad.getPassowrd();
+			String emailId = ad.getEmail();
+			String mobileNumber = ad.getMobileNumber();
+		
+		String insertSQL = "INSERT INTO admin values('" + firstName + "','" + lastName + "','" + userName + "','" +
+                password + "','" + emailId + "','" + mobileNumber + "')";
+		try {
 
-				closeEverything(clientSocket, objIs, objOs);
-			}	
-		}//end of run
+            stmt = dbConn.createStatement();
+            int x = stmt.executeUpdate(insertSQL);
+            if (x == 1) {
+            	objO.writeObject(true);
+            	JOptionPane.showMessageDialog(null, "Account created");
+            } else {
+            	objO.writeObject(false);
+            	JOptionPane.showMessageDialog(null, "Already exist");
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        } 
+	}
+	
+	//creates a student and adds them to the student table in the database
+	public static void createStudentRecord(Student st) {
+		    String firstName =st.getFirstName();
+			String lastName = st.getLastName();
+			String userName = st.getUserName();
+			String password = st.getPassowrd();
+			String emailId = st.getEmail();
+			String mobileNumber = st.getMobileNumber();
 		
-		public void closeEverything(Socket connectionSocket, DataInputStream objIs, DataOutputStream objOs) {
+		String insertSQL = "INSERT INTO student values('" + firstName + "','" + lastName + "','" + userName + "','" +
+             password + "','" + emailId + "','" + mobileNumber + "')";
+		try {
+
+         stmt = dbConn.createStatement();
+         int x = stmt.executeUpdate(insertSQL);
+         if (x == 1) {
+        	 objO.writeObject(true);
+         	JOptionPane.showMessageDialog(null, "Account created");
+         } else {
+        	 objO.writeObject(false);
+         	JOptionPane.showMessageDialog(null, "Already exist");
+         }
+     } catch (Exception exception) {
+         exception.printStackTrace();
+     } 
+	
+	}
+	
+	//creates a an SSAdvisor and adds them to the admin table in the database
+		public static void createSSAdvisorRecord(SSAdvisor adv) {
+			    String firstName = adv.getFirstName();
+				String lastName = adv.getLastName();
+				String userName = adv.getUserName();
+				String password = adv.getPassowrd();
+				String emailId = adv.getEmail();
+				String mobileNumber = adv.getMobileNumber();
+			
+			String insertSQL = "INSERT INTO advisor values('" + firstName + "','" + lastName + "','" + userName + "','" +
+	                password + "','" + emailId + "','" + mobileNumber + "')";
 			try {
-				if (objIs!=null)objIs.close();
-				if (objOs!=null)objOs.close();
-				if (connectionSocket!=null)connectionSocket.close();	
-			} catch (Exception e) {
-				  System.err.println("Error closing socket and streams: " + e.getMessage());
-			}
-		}//end of closeEverything
+
+	            stmt = dbConn.createStatement();
+	            int x = stmt.executeUpdate(insertSQL);
+	            if (x == 1) {
+	            	 objO.writeObject(true);
+	            	JOptionPane.showMessageDialog(null, "Account created");
+	            } else {
+	            	objO.writeObject(false);
+	            	JOptionPane.showMessageDialog(null, "Already exist");
+	            }
+	        } catch (Exception exception) {
+	            exception.printStackTrace();
+	        } 
+		}
+	
+		public void request() {
+		    Object action = "";
+		    getConnection();
+
+		    Student stuObj = null;
+		    Administration adObj = null;
+		    SSAdvisor advObj = null;
+
+		    try {
+		        while (true) {
+		            connectionSocket = serverSocket.accept();
+		            this.configureStreams();
+		            try {
+		                action = objI.readObject();
+
+		                if (action.equals("Add Student")) {
+		                    stuObj = (Student) objI.readObject();
+		                    createStudentRecord(stuObj);
+		                  //addStudentToFile(stuObj);
+		                    objO.writeObject(true);
+		                } else if (action.equals("Add Supervisor")) {
+		                    adObj = (Administration) objI.readObject();
+		                    createAdministrationRecord(adObj);
+		                  //addAministratorToFile(adObj);
+		                    objO.writeObject(true);
+		                } else if (action.equals("Add Advisor")) {
+		                    advObj = (SSAdvisor) objI.readObject();
+		                  //addAdvisorToFile(advObj);
+		                    createSSAdvisorRecord(advObj);
+		                    objO.writeObject(true);
+		                }
+
+		            } catch (EOFException e) {
+		                System.out.println("Client closed the connection.");
+		                closeConnection();
+		            } catch (Exception e) {
+		                e.printStackTrace();
+		                closeConnection();
+		            }
+		        }
+		    } catch (IOException e) {
+		        e.printStackTrace();
+		    }
+		}
+
+
 		
-	}//end of inner class
+	//main method
+		public static void main(String[] args) {
+			new Server();	//starts the server
 	
-	
-}//end of server class
+		}
+
+}
