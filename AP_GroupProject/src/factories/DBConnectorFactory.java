@@ -11,7 +11,7 @@ public class DBConnectorFactory {
 	private static Connection dbConn = null;
 	
 	public static Connection getConnection() {
-		if(dbConn ==null) {
+		if(dbConn == null) {
 			String url = "jdbc:mysql://localhost:3307/dbproject";	//localhost:3307 is used with webserver
 			try {
 				dbConn =DriverManager.getConnection(url, "root", "usbw"); //using web server, therefore password is "usbw" 

@@ -82,44 +82,6 @@ public class Client extends Administration implements Serializable{
 	}
 
 	
-	//authentication of a admin user
-	/*public void authenticateAdmin(Administration ad) {
-		String username = ad.getUserName();
-		String password = ad.getPassowrd();
-		String sql = "Select * from admin where userName=? and password= ?";
-		
-		PreparedStatement pst = dbConn.prepareStatement(sql);
-		
-		//accepting from user
-        pst.setString(1, ad.getUserName());
-        pst.setString(2, ad.getPassowrd());
-		
-        
-        try {
-        	stmt = dbConn.createStatement();
-        	
-        	ResultSet rs = pst.executeQuery();
-        	if(rs.next()) {
-            	JOptionPane.showMessageDialog(null, "You are logged in as administrator");
-            	StudentDashboard menu = new StudentDashboard();
-            	menu.setVisible(true);
-            	
-            	logger.info("Administrator Logged in successfully");
-            	
-            }else {
-
-            	JOptionPane.showMessageDialog(null, "Invalid log in. Please try again.");
-            	username.  //setText("");
-            	password.wait();  //setText("");
-            	
-            	logger.info("Unsuccessful login attempt by administrator");
-            }
-        }catch (Exception exception) {
-            exception.printStackTrace();
-        } 
-	}*/
-	
-	
 	public static void main(String[] args) {
 	
 		new Client();
