@@ -1,168 +1,91 @@
 package client;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.net.Socket;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 import javax.swing.JOptionPane;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 
+import factories.DBConnectorFactory;
 import view.Administration;
-import view.MainMenu;
-import view.SSAdvisor;
+import view.LoginPage;
 import view.Student;
 
-public class Client extends Student implements Serializable{
-	
-	
+public class Client extends Administration implements Serializable{
+
 	private static final long serialVersionUID = 1L;
-	private ObjectOutputStream objOs;
-	private ObjectInputStream objIs;
-	private Socket connectionSocket;
-	private String action;
+	private static Connection dbConn = null;
+	private static Statement stmt;
+	//private static ResultSet result;
+	//private static Administration ad = new Administration();
 	
-	public Client(){
-		this.createConnection();
-		this.configureConnection();
+	//initializing logger to class
+    private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(LoginPage.class); 
+	
+	public Client() {
+		dbConn = DBConnectorFactory.getConnection();
 	}
-	
-	public void createConnection() {
-		try {
-			//create a socket to connect to the server
-			this.connectionSocket = new Socket("localhost", 8888);
-			System.out.println("Connected to server.");
-			 MainMenu main = new MainMenu();    //open the main menu when connected to server
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-	}
-	
-	public void configureConnection() {
-		try {
-			objOs = new ObjectOutputStream(connectionSocket.getOutputStream());
-			objIs = new ObjectInputStream(connectionSocket.getInputStream());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
+	//creates a an administration and adds them to the admin table in the database
+	public static void createRecord(Administration ad) {
+		   String firstName = ad.getFirstName();
+			String lastName = ad.getLastName();
+			String userName = ad.getUserName();
+			String password = ad.getPassowrd();
+			String emailId = ad.getEmail();
+			String mobileNumber = ad.getMobileNumber();
 		
-	}
-	
-	public void closeConnection() {
-        try {
-            objOs.close();
-            objIs.close();
-            connectionSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void sendAction(String action) {
-        this.action = action;
-        try {
-            objOs.writeObject(action);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-	//write object to database 
-    public void sendStudent(Student stuObj) {
-        try {
-            objOs.writeObject(stuObj);
-            objOs.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
-  //write object to database 
-    public void sendSupervisor(Administration adObj) {
-        try {
-            objOs.writeObject(adObj);
-            objOs.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
-  //write object to database 
-    public void sendAdvisor(SSAdvisor ssaObj) {
-        try {
-            objOs.writeObject(ssaObj);
-            objOs.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-     public void receiveResponse() {
-        try {
-            if(action.equalsIgnoreCase("Add Student")) {
-                Boolean flag = (Boolean) objIs.readObject();
-                if (flag == true) {
-                    JOptionPane.showMessageDialog(null, "Record added successfully", "Add Record Status", JOptionPane.INFORMATION_MESSAGE);
-                }
-            } else  if(action.equalsIgnoreCase("Add Supervisor")){
-                    Boolean flag = (Boolean) objIs.readObject();
-                    if (flag == true) {
-                        JOptionPane.showMessageDialog(null, "Record added successfully", "Add Record Status", JOptionPane.INFORMATION_MESSAGE);
-                    }
-            	} else if(action.equalsIgnoreCase("Add Advisor")) {
-                    Boolean flag = (Boolean) objIs.readObject();
-                    if (flag == true) {
-                        JOptionPane.showMessageDialog(null, "Record added successfully", "Add Record Status", JOptionPane.INFORMATION_MESSAGE);
-                        
-                    }
-            	
-            	}
-            
-         }catch(ClassCastException ex) {
-        	ex.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-	
-	
-	public String listenForMessage() {
-		String messageGot,message = null, username = null;
-		
-        try {
-        	username=objIs.readUTF();
-        	message = objIs.readUTF();
-        	System.out.println(username+" : "+message);
-        } catch (IOException e) {
-            System.err.println("Error receiving message from server");
-            closeAll(connectionSocket, objIs, objOs);
-        }
-        messageGot = (username+" : "+message);
-        return messageGot;
-    }
-	
-	public void closeAll(Socket socket, ObjectInputStream objIs, ObjectOutputStream objOs) {
+		String insertSQL = "INSERT INTO admin values('" + firstName + "','" + lastName + "','" + userName + "','" +
+                password + "','" + emailId + "','" + mobileNumber + "')";
 		try {
-			if (objIs!=null) {
-				objIs.close();
-			}
-			if (objOs!=null) {
-				objOs.close();
-			}
-			if (socket!=null) {
-				socket.close();
-			}
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}//end of closeEverything
+
+            stmt = dbConn.createStatement();
+            int x = stmt.executeUpdate(insertSQL);
+            if (x == 1) {
+            	JOptionPane.showMessageDialog(null, "Account created");
+            } else {
+            	JOptionPane.showMessageDialog(null, "Already exist");
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        } 
+	}
+
+	//creates a student and adds them to the student table in the database
+	public static void createStudentRecord(Student st) {
+		    String firstName =st.getFirstName();
+			String lastName = st.getLastName();
+			String userName = st.getUserName();
+			String password = st.getPassowrd();
+			String emailId = st.getEmail();
+			String mobileNumber = st.getMobileNumber();
+		
+		String insertSQL = "INSERT INTO student values('" + firstName + "','" + lastName + "','" + userName + "','" +
+             password + "','" + emailId + "','" + mobileNumber + "')";
+		try {
+
+         stmt = dbConn.createStatement();
+         int x = stmt.executeUpdate(insertSQL);
+         if (x == 1) {
+         	JOptionPane.showMessageDialog(null, "Account created");
+         } else {
+         	JOptionPane.showMessageDialog(null, "Already exist");
+         }
+     } catch (Exception exception) {
+         exception.printStackTrace();
+     } 
+	
+	}
+
 	
 	public static void main(String[] args) {
-		new Client();	//starts the client
+	
+		new Client();
 
 	}
+
 }

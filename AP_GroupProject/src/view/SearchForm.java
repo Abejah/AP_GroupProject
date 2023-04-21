@@ -1,7 +1,7 @@
 package view;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
+
 
 import client.DBClient;
 import domain.Student;
@@ -22,20 +22,7 @@ public class SearchForm extends JFrame implements ActionListener{
     private JScrollPane scrollPane;
     
     public Student student=new Student();
-    
-    
-//    private String search,id;
-//    private String[] data=new String[10];
-//    private String[] columnNames={"Reference Number","Id Number", "First Name", "Last Name", "Email", "Contact Number", "Issue Type","Issue", "Issue Details", "Responses"};
-//    public DBClient db;
-//    
-//    private Object[][] allData=new Object[10][10];
-//    private DefaultTableModel model;
-//    private JTable table;
- 
-//    
-    
-
+       
     public SearchForm()
     {
     	//this.db= new DBClient();
@@ -61,7 +48,7 @@ public class SearchForm extends JFrame implements ActionListener{
         resultsArea.setWrapStyleWord(true);
         scrollPane = new JScrollPane();
         JScrollPane scrollPane = new JScrollPane(resultsArea);
-        scrollPane.setBounds(10, 60, 700, 600);
+        scrollPane.setBounds(10, 60, 700, 500);
        
 
         searchField.setForeground(Color.GRAY);
@@ -117,9 +104,6 @@ public class SearchForm extends JFrame implements ActionListener{
             public void actionPerformed(ActionEvent e) {
                 String search = searchField.getText();
                 String id= idSearchField.getText();
-
-                //DBClient lient =new DBClient();
-                //Student students = DBClient.(search,id);
                 
                 DBClient dbClient =new DBClient();
                 dbClient.sendAction("Find Student");
@@ -129,8 +113,7 @@ public class SearchForm extends JFrame implements ActionListener{
                 resultsArea.append(student.toString());
             }
         });
-        
-        
+         
 
         setBounds(250,30,781, 650);
         setLayout(null);

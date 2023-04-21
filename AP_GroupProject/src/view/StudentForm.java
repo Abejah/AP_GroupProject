@@ -23,6 +23,7 @@ public class StudentForm extends JFrame implements Serializable
     private static JTextField refNumber,idNumber,firstName,lastName,email,contactNumber;
     private static JButton saveButton;
     private static JTextArea detail;
+    private Student student=new Student();
 
     public static void main(String[] args)
     {
@@ -156,57 +157,44 @@ public class StudentForm extends JFrame implements Serializable
         setResizable(false);
         setUndecorated(true);
 
-//        idNumber.addActionListener(new ActionListener()
-//        {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                    String idField=idNumber.getText();
-//
-//                    DBClient DBClient =new DBClient();
-//                    //student = DBClient.getInfoFromDatabase(idField);
-//
-//                    //String name=students.getFirstName();
-//
-//                    //firstName.setText(students.toString());
-//
-//
-//                    firstName.setEditable(true);
-//                    lastName.setEditable(true);
-//                    email.setEditable(true);
-//                    contactNumber.setEditable(true);
-//                    
-////                try {
-////                    firstName.setText(DBClient.getResultSet().getString(2));
-////                    lastName.setText(DBClient.getResultSet().getString(3));
-////                    email.setText(DBClient.getResultSet().getString(4));
-////                    contactNumber.setText(DBClient.getResultSet().getString(5));
-////                } catch (SQLException ex) {
-////                    throw new RuntimeException(ex);
-////                }
-////                firstName.setEditable(false);
-////                lastName.setEditable(false);
-////                email.setEditable(false);
-////                contactNumber.setEditable(false);
-//
-////                    lastName.setText(student.getLastName(F);
-////                    email.setText(student.getEmail());
-////                    contactNumber.setText(String.valueOf(student.getContactNumber()));
-//            }
-//        });
-//        refNumber.addActionListener(new ActionListener()
-//        {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                DBClient DBClient =new DBClient();
-//                refNumber.setEditable(false);
-//                try {
-//                    refNumber.setText(DBClient.getResultSet().getString(1));
-//                    JOptionPane.showMessageDialog(null, "Please Make Note of your Reference Number: "+ refNumber, "IMPORTANT MESSAGE", JOptionPane.INFORMATION_MESSAGE);
-//                } catch (SQLException ex) {
-//                    throw new RuntimeException(ex);
-//                }
-//            }
-//        });
+        idNumber.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                    String idField=idNumber.getText();
+
+                    DBClient dbClient =new DBClient();
+                    dbClient.sendAction("Find StudentID");
+                    dbClient.sendStudentId(idField);
+                    student= dbClient.receiveResponse();
+
+                    firstName.setEditable(true);
+                    lastName.setEditable(true);
+                    email.setEditable(true);
+                    contactNumber.setEditable(true);
+                    
+                firstName.setText(student.getFirstName());
+				lastName.setText(student.getLastName());
+				email.setText(student.getEmail());
+				contactNumber.setText(String.valueOf(student.getContactNumber()));
+              
+				idNumber.setEditable(false);
+                firstName.setEditable(false);
+                lastName.setEditable(false);
+                email.setEditable(false);
+                contactNumber.setEditable(false);
+            }
+        });
+        refNumber.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DBClient DBClient =new DBClient();
+                refNumber.setEditable(false);
+                refNumber.setText(student.getRefNumber().toString());
+				JOptionPane.showMessageDialog(null, "Please Make Note of your Reference Number: "+ refNumber, "IMPORTANT MESSAGE", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
 
         saveButton.addActionListener(new ActionListener() {
             @Override
